@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Producer;
+use App\Helper\ErrorHelper;
 use App\Helper\ResponseBag;
 use App\Repository\ProducerRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,14 +26,14 @@ class ProducerController extends AbstractController
     }
 
     #[Route(path: '', name: 'producer_create', methods: ['POST'])]
-    public function create(Request $request) : ResponseBag
+    public function create(Request $request, ErrorHelper $errorHelper) : ResponseBag
     {
         $params = $request->toArray();
         $producer = new Producer();
         $producer->setName($params['name'] ?? null);
         $errors = $this->validator->validate($producer);
         if (count($errors) > 0) {
-            return new ResponseBag((string)$errors, 422);
+            return new ResponseBag($errorHelper->transformErrors($errors), 422);
         }
 
         $this->producerRepository->save($producer, true);

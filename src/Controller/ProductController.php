@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Model;
 use App\Entity\Product;
+use App\Helper\ErrorHelper;
 use App\Helper\ResponseBag;
 use App\Repository\ModelRepository;
 use App\Repository\ProductRepository;
@@ -28,7 +29,7 @@ class ProductController extends AbstractController
     }
 
     #[Route(path: '', name: 'product_create', methods: ['POST'])]
-    public function create(Request $request) : ResponseBag
+    public function create(Request $request, ErrorHelper $errorHelper) : ResponseBag
     {
         $params = $request->toArray();
         $product = new Product();
@@ -40,7 +41,7 @@ class ProductController extends AbstractController
         }
         $errors = $this->validator->validate($product);
         if (count($errors) > 0) {
-            return new ResponseBag((string)$errors, 422);
+            return new ResponseBag($errorHelper->transformErrors($errors), 422);
         }
 
         /** @var ProductRepository $repository */

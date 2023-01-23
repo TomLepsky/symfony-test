@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\ProductType;
+use App\Helper\ErrorHelper;
 use App\Helper\ResponseBag;
 use App\Repository\ProductTypeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,14 +26,14 @@ class ProductTypeController extends AbstractController
     }
 
     #[Route(path: '', name: 'product_type_create', methods: ['POST'])]
-    public function create(Request $request) : ResponseBag
+    public function create(Request $request, ErrorHelper $errorHelper) : ResponseBag
     {
         $params = $request->toArray();
         $productType = new ProductType();
         $productType->setName($params['name'] ?? null);
         $errors = $this->validator->validate($productType);
         if (count($errors) > 0) {
-            return new ResponseBag((string)$errors, 422);
+            return new ResponseBag($errorHelper->transformErrors($errors), 422);
         }
 
         $this->productTypeRepository->save($productType, true);

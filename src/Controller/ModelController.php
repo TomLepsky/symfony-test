@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Model;
 use App\Entity\Producer;
 use App\Entity\ProductType;
+use App\Helper\ErrorHelper;
 use App\Helper\ResponseBag;
 use App\Repository\ModelRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -18,7 +19,7 @@ class ModelController extends AbstractController
 {
     public function __construct(
         private readonly ValidatorInterface $validator,
-        private readonly EntityManagerInterface  $entityManager,
+        private readonly EntityManagerInterface  $entityManager
     ) {}
 
     #[Route(path: '', name: 'model_get_collection', methods: ['GET'])]
@@ -28,7 +29,7 @@ class ModelController extends AbstractController
     }
 
     #[Route(path: '', name: 'model_create', methods: ['POST'])]
-    public function create(Request $request) : ResponseBag
+    public function create(Request $request, ErrorHelper $errorHelper) : ResponseBag
     {
         $params = $request->toArray();
         $model = new Model();
@@ -46,7 +47,7 @@ class ModelController extends AbstractController
 
         $errors = $this->validator->validate($model);
         if (count($errors) > 0) {
-            return new ResponseBag((string)$errors, 422);
+            return new ResponseBag($errorHelper->transformErrors($errors), 422);
         }
 
         /** @var ModelRepository $repository */
